@@ -1,3 +1,4 @@
+from tkinter import E
 from Etudiant import Etudiant
 from Parcours import Parcours
 
@@ -61,7 +62,7 @@ def GS_etudiant(list_etudiant, list_spe):
         spec.print_list_etudiant()
 
 
-GS_etudiant(list_etudiant, list_spe)
+# GS_etudiant(list_etudiant, list_spe)
 
 
 def GS_spe(list_etudiant, list_spe):
@@ -84,4 +85,45 @@ def GS_spe(list_etudiant, list_spe):
 
 
 GS_spe(list_etudiant, list_spe)
+
+
+def to_pairs(list_etudiant):
+    couple_mariage = []
+    for etudiant in list_etudiant:
+        couple_mariage.append((etudiant, etudiant.spec))
+    return couple_mariage
+
+
+def find_pair_instable(list_pairs, list_etudiant):
+    dictionary = dict(to_pairs(list_etudiant))
+    for etudiant, spec in list_pairs:
+        list_pref_spec = spec.get_table_pref()
+        index = list_pref_spec.index(etudiant.id)
+        for i in range(index):
+            eid = list_pref_spec[i]
+            e = list_etudiant[eid]
+            list_pref_etu = e.get_table_pref()
+            rang_spec = list_pref_etu.index(spec.id)
+            spec_current = dictionary.get(e)
+            rang_current = list_pref_etu.index(spec_current.id)
+            if rang_spec < rang_current:
+                return (e, spec)
+
+
+le = []
+le.append(Etudiant(0, "etu1", [0, 1, 2]))
+le.append(Etudiant(1, "etu2", [2, 0, 1]))
+le.append(Etudiant(2, "etu3", [0, 1, 2]))
+ls = []
+ls.append(Parcours(0, "A", 1, [0, 1, 2]))
+ls.append(Parcours(1, "B", 1, [0, 2, 1]))
+ls.append(Parcours(2, "C", 1, [1, 0, 2]))
+le[0].set_spec(ls[0])
+le[1].set_spec(ls[1])
+le[2].set_spec(ls[2])
+ls[0].add_etudiant(le[0])
+ls[1].add_etudiant(le[1])
+ls[2].add_etudiant(le[2])
+(e, s) = find_pair_instable(to_pairs(le), le)
+print(e.name, s.name)
 
