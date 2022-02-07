@@ -1,6 +1,7 @@
 from tkinter import E
 from Etudiant import Etudiant
 from Parcours import Parcours
+import random
 
 
 def lecture_etu(nomFichier):
@@ -126,4 +127,39 @@ ls[1].add_etudiant(le[1])
 ls[2].add_etudiant(le[2])
 (e, s) = find_pair_instable(to_pairs(le), le)
 print(e.name, s.name)
+
+
+def create_table_preference_etu(nombre_etudiant, nomFichier):
+    monFichier = open(nomFichier, "w")
+    monFichier.write(str(nombre_etudiant) + "\n")
+    for i in range(nombre_etudiant):
+        pref = list(range(9))
+        random.shuffle(pref)
+        strpref = " ".join(map(str, pref))
+        monFichier.write(str(i) + " " + "Etu" + str(i) + " " + strpref + "\n")
+    monFichier.close()
+
+
+create_table_preference_etu(20, "PrefEtu20.txt")
+
+
+def create_table_preference_spec(nombre_etudiant, nomFichier):
+    monFichier = open(nomFichier, "w")
+    monFichier.write("NbEtu " + str(nombre_etudiant) + "\n")
+    a = random.sample(range(1, nombre_etudiant), k=8)
+    print(a)
+    a.append(0)
+    a.append(nombre_etudiant)
+    a.sort()
+    b = [a[i + 1] - a[i] for i in range(9)]
+    strcap = " ".join(map(str, b))
+    monFichier.write("Cap " + strcap + "\n")
+    for i in range(9):
+        pref = list(range(nombre_etudiant))
+        random.shuffle(pref)
+        strpref = " ".join(map(str, pref))
+        monFichier.write(str(i) + " " + "Spe" + str(i) + " " + strpref + "\n")
+
+
+create_table_preference_spec(20, "ps20.txt")
 
