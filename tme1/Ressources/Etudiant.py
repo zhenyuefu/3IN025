@@ -49,3 +49,8 @@ class Etudiant:
     def reset(self):
         self.now = -1
         self.spec = None
+
+    def get_score(self, spec):
+        index = self.get_table_pref().index(spec.id)
+        return len(self.get_table_pref()) - index
+

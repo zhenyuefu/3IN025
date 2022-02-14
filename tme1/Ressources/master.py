@@ -2,6 +2,7 @@ from tkinter import E
 from Etudiant import Etudiant
 from Parcours import Parcours
 import random
+import gurobipy as gp
 
 
 def lecture_etu(nomFichier):
@@ -63,7 +64,7 @@ def GS_etudiant(list_etudiant, list_spe):
         spec.print_list_etudiant()
 
 
-# GS_etudiant(list_etudiant, list_spe)
+GS_etudiant(list_etudiant, list_spe)
 
 
 def GS_spe(list_etudiant, list_spe):
@@ -85,7 +86,7 @@ def GS_spe(list_etudiant, list_spe):
         etudiant.print_spec()
 
 
-GS_spe(list_etudiant, list_spe)
+# GS_spe(list_etudiant, list_spe)
 
 
 def to_pairs(list_etudiant):
@@ -140,7 +141,7 @@ def create_table_preference_etu(nombre_etudiant, nomFichier):
     monFichier.close()
 
 
-create_table_preference_etu(20, "PrefEtu20.txt")
+create_table_preference_etu(20, "pe20.txt")
 
 
 def create_table_preference_spec(nombre_etudiant, nomFichier):
@@ -163,3 +164,51 @@ def create_table_preference_spec(nombre_etudiant, nomFichier):
 
 create_table_preference_spec(20, "ps20.txt")
 
+
+def creat_LP(filename, k, list_etu, list_spe):
+    f = open(filename, "w")
+    f.write("maximize\n")
+    for i in range(len(list_etu) - 1):
+        for j in range(len(list_spe)):
+            score = list_etu[i].get_score(list_spe[j]) + list_spe[j].get_score(
+                list_etu[i]
+            )
+            f.write(f"{score} x{i}_{j} + ")
+    for i in range(len(list_spe) - 1):
+        score = list_etu[i].get_score(list_spe[j]) + list_spe[j].get_score(list_etu[i])
+        f.write(f"{score} x{len(list_etu)-1}_{i} + ")
+    score = list_etu[-1].get_score(list_spe[-1]) + list_spe[-1].get_score(list_etu[-1])
+    f.write(f"{score} x{len(list_etu)-1}_{len(list_spe)-1} \n")
+    f.write("Subject To\n")
+    for i in range(len(list_etu)):
+        for j in range(len(list_spe) - 1):
+            f.write(f"x{i}_{j} + ")
+        f.write(f"x{i}_{len(list_spe)-1} = 1\n")
+    for j in range(len(list_spe)):
+        for i in range(len(list_etu) - 1):
+            f.write(f"x{i}_{j} + ")
+        f.write(f"x{len(list_etu)-1}_{j} = {list_spe[j].cap}\n")
+    f.write("Bounds\n")
+    for etudiant in list_etu:
+        for spec in etudiant.get_table_pref()[k:]:
+            f.write(f"x{etudiant.id}_{spec} = 0\n")
+        for spec in etudiant.get_table_pref()[:k]:
+            pref_spec = list_spe[int(spec)].get_table_pref()
+            if pref_spec.index(etudiant.id) >= k:
+                f.write(f"x{etudiant.id}_{spec} = 0\n")
+    f.write("Binary\n")
+    for i in range(len(list_etu)):
+        for j in range(len(list_spe)):
+            f.write(f"x{i}_{j} ")
+    f.write("\n")
+    f.write("End\n")
+    f.close()
+
+
+creat_LP("LP.lp", 9, list_etudiant, list_spe)
+
+model = gp.read("LP.lp")
+model.optimize()
+print(model.status)
+if model.status == gp.GRB.OPTIMAL:
+    model.write("LP.sol")

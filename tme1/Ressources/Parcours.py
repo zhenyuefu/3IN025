@@ -55,3 +55,8 @@ class Parcours:
     def reset(self):
         now = -1
         list_etudiant = []
+
+    def get_score(self, etudiant):
+        index = self.table_pref.index(etudiant.id)
+        return len(self.table_pref) - index
+
